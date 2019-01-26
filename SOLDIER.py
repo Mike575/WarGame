@@ -1,12 +1,8 @@
-import random
-import pygame
-import sys
-from pygame.locals import *
 from WarGlobalVar import *
 
 
 class SOLDIER:
-    blood = 3
+    blood = 99
     attackValue = 2
 
     def checkEdgeRule(self,checkcoord):
@@ -25,19 +21,26 @@ class SOLDIER:
     def __init__(self, name, color):
         self.name = name
         self.color = color
-        self.coord = self.getRandomLocation()
-        while (self.checkOverRule(self.coord) == False or
-                self.checkEdgeRule(self.coord) == False):
-            self.coord = self.getRandomLocation()
+        nextPoint = self.getRandomLocation()
+        while (self.checkOverRule(nextPoint) == False or
+                self.checkEdgeRule(nextPoint) == False):
+            nextPoint = self.getRandomLocation()
+        self.coord = nextPoint
         return
 
     def dead(self,soldier):
         soldier.coord = {'x':-10,'y':-10}
 
     def checkOverRule(self,coord):
-        for key in Army_Status:
-            if Army_Status[key].coord['x'] == coord['x'] and\
-                    Army_Status[key].coord['y'] == coord['y']:
+        for key in ArmyA_Status:
+            if ArmyA_Status[key].coord['x'] == coord['x'] and\
+                    ArmyA_Status[key].coord['y'] == coord['y'] and\
+                    key != self.name:
+                return False
+        for key in ArmyB_Status:
+            if ArmyB_Status[key].coord['x'] == coord['x'] and\
+                    ArmyB_Status[key].coord['y'] == coord['y'] and\
+                    key != self.name:
                 return False
         # ensure have already checking everybody Location
         return True
@@ -46,22 +49,35 @@ class SOLDIER:
         return {'x': random.randint(0, CELLWIDTH - 1), 'y': random.randint(0, CELLHEIGHT - 1)}
 
     def searchEnemy(self,step):
-        for i in range(1,step):
-            for key in Army_Status:
-                if abs(Army_Status[key].coord['x'] - self.coord['x'])\
-                   + abs(Army_Status[key].coord['y'] - self.coord['y'])\
-                   == i and Army_Status[key].blood > 0:
-                    return Army_Status[key]
+        if self.color == Army_B_Color:
+            for i in range(1,step):
+                for key in ArmyA_Status:
+                    if abs(ArmyA_Status[key].coord['x'] - self.coord['x'])\
+                       + abs(ArmyA_Status[key].coord['y'] - self.coord['y'])\
+                       == i and ArmyA_Status[key].blood > 0:
+                        return ArmyA_Status[key]
+
+        if self.color == Army_A_Color:
+            for i in range(1,step):
+                for key in ArmyB_Status:
+                    if abs(ArmyB_Status[key].coord['x'] - self.coord['x'])\
+                       + abs(ArmyB_Status[key].coord['y'] - self.coord['y'])\
+                       == i and ArmyB_Status[key].blood > 0:
+                        return ArmyB_Status[key]
         return None
 
     def attack(self):
         Enemy = self.searchEnemy(20)
         if Enemy == None:
+            print('Enemy None')
             self.moveCasually()
         else:
+            print('find Enemy')
             if self.isInAttackArea(Enemy):
+                print("in attackArea")
                 Enemy.blood = Enemy.blood - self.attackValue
             else:
+                print("moveto Enemy")
                 self.moveto(Enemy)
                 if self.isInAttackArea(Enemy):
                     Enemy.blood = Enemy.blood - self.attackValue
@@ -71,7 +87,7 @@ class SOLDIER:
     def moveto(self,Enemy):
         deltax = abs(Enemy.coord['x'] - self.coord['x'])
         deltay = abs(Enemy.coord['y'] - self.coord['y'])
-        nextPoint = self.coord
+        nextPoint = {'x':self.coord['x'], 'y':self.coord['y']}
         if deltay > deltax and Enemy.coord['y'] < self.coord['y']:
             nextPoint['y'] = nextPoint['y'] - 1
         elif deltay > deltax and Enemy.coord['y'] >= self.coord['y']:
@@ -82,12 +98,12 @@ class SOLDIER:
             nextPoint['x'] = nextPoint['x'] + 1
         else:
             print('moveto error')
-            if (self.checkEdgeRule(nextPoint) == True and self.checkOverRule(nextPoint) == True):
-                self.coord = nextPoint
-
-
-
-
+        if (self.checkEdgeRule(nextPoint) == True and self.checkOverRule(nextPoint) == True):
+            print('nextPoint')
+            print(nextPoint)
+            self.coord = {'x': nextPoint['x'], 'y': nextPoint['y']}
+        else:
+            print('can not go to nextPoint')
 
     def isInAttackArea(self,Enemy):
         if abs(Enemy.coord['x'] -self.coord['x'])\
@@ -123,6 +139,26 @@ class SOLDIER:
             self.coord = {'x': Point['x'], 'y': Point['y']}
             print(self.coord)
         print(self.coord)
+
+    def escapefrom(self,Enemy):
+        deltax = abs(Enemy.coord['x'] - self.coord['x'])
+        deltay = abs(Enemy.coord['y'] - self.coord['y'])
+        nextPoint = {'x':self.coord['x'], 'y':self.coord['y']}
+        if deltay < deltax and Enemy.coord['y'] < self.coord['y']:
+            nextPoint['y'] = nextPoint['y'] + 1
+        elif deltay < deltax and Enemy.coord['y'] >= self.coord['y']:
+            nextPoint['y'] = nextPoint['y'] - 1
+        elif deltay >= deltax and Enemy.coord['x'] < self.coord['x']:
+            nextPoint['x'] = nextPoint['x'] + 1
+        elif deltay >= deltax and Enemy.coord['x'] >= self.coord['x']:
+            nextPoint['x'] = nextPoint['x'] - 1
+        else:
+            print('moveto error')
+        if (self.checkEdgeRule(nextPoint) == True and self.checkOverRule(nextPoint) == True):
+            self.coord = {'x': nextPoint['x'], 'y': nextPoint['y']}
+
+        return
+
 
     def terminate(self):
         pygame.quit()

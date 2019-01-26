@@ -1,20 +1,7 @@
-#------GAME CONSTANT--------
-
-FPS = 15
-Army_Status = {}
-Army_A_Num = 100
-Army_B_Num = 1
-
-
-#-----Window setting--------
-WINDOWWIDTH = 640
-WINDOWHEIGHT = 480
-CELLSIZE = 20
-assert WINDOWWIDTH % CELLSIZE == 0, "Window width must be a multiple o    f cell size."
-assert WINDOWHEIGHT % CELLSIZE == 0, "Window height must be a multiple     of cell size."
-CELLWIDTH = int(WINDOWWIDTH / CELLSIZE)
-CELLHEIGHT = int(WINDOWHEIGHT / CELLSIZE)
-#---------------------------
+import random
+import pygame
+import sys
+from pygame.locals import *
 
 #---color setting------
 WHITE = (255, 255, 255)
@@ -25,4 +12,21 @@ DARKGRAY = ( 40, 40, 40 )
 DARKGREEN = ( 0, 155, 0 )
 BGCOLOR = BLACK
 #----------------------
+#------GAME CONSTANT--------
+FPS = 5
+ArmyA_Status = {}
+ArmyB_Status = {}
+Army_A_Num = 10
+Army_B_Num = 10
+Army_A_Color = RED
+Army_B_Color = GREEN 
+#-----Window setting--------
+WINDOWWIDTH = 640
+WINDOWHEIGHT = 480
+CELLSIZE = 20
+assert WINDOWWIDTH % CELLSIZE == 0, "Window width must be a multiple of cell size."
+assert WINDOWHEIGHT % CELLSIZE == 0, "Window height must be a multiple of cell size."
+CELLWIDTH = int(WINDOWWIDTH / CELLSIZE)
+CELLHEIGHT = int(WINDOWHEIGHT / CELLSIZE)
+#---------------------------
 

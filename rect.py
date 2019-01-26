@@ -1,18 +1,20 @@
 
 from SOLDIER import *
-
-
+Awin = 0
+Bwin = 0
+tie = 0
 def main():
     global FPSCLOCK, DISPLAYSURF, BASICFONT
-    global Army_Status
+    global ArmyA_Status, ArmyB_Status
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     BASICFONT = pygame.font.Font('freesansbold.ttf', 20)
     pygame.display.set_caption('War')
-    initWarGame()
     while True:
+        initWarGame()
         runGame()
+
 
 
 def initWarGame():
@@ -20,9 +22,9 @@ def initWarGame():
     drawGrid()
     drawPressMsg()
     for i in range(Army_A_Num):
-        Army_Status['A'+ str(i)] = SOLDIER('A'+str(i), RED)
+        ArmyA_Status['A'+ str(i)] = SOLDIER('A'+str(i), Army_A_Color)
     for i in range(Army_B_Num):
-        Army_Status['B'+ str(i)] = SOLDIER('B'+str(i), GREEN)
+        ArmyB_Status['B'+ str(i)] = SOLDIER('B'+str(i), Army_B_Color)
 
 def runGame():
     while True:
@@ -30,29 +32,73 @@ def runGame():
         checkForKeyPress()
         drawGrid()
         drawPressMsg()
-
-        #----Strategy-----------
-        for key in Army_Status:
-            if Army_Status[key].color == RED:
-                if Army_Status[key].blood > 0:
-                    Army_Status[key].moveCasually()
-                else:
-                    Army_Status[key].dead(Army_Status[key])
-            else:
-                Army_Status[key].attack()
-
-        #-----------------------
+        print("start")
+        
+        for i in range(Army_A_Num):
+            if ArmyB_Status['B'+ str(i)].blood > 0:
+                ArmyB_Status['B'+ str(i)].attack()
+            if ArmyA_Status['A'+ str(i)].blood > 0:
+                ArmyA_Status['A'+ str(i)].attack()
 
         BlockFlush()
-
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+        result = checkGameOver()
+        if not result is None:
+            return result
+'''
+        #----Strategy-----------
+        for key in ArmyA_Status:
+            if ArmyA_Status[key].blood > 0:
+                Enemy = ArmyA_Status[key].searchEnemy(3) 
+                if Enemy is None:
+                    ArmyA_Status[key].moveCasually()
+                else:
+                    ArmyA_Status[key].escapefrom(Enemy)
+            else:
+                ArmyA_Status[key].dead(ArmyA_Status[key])
+        for key in ArmyB_Status:
+            if ArmyB_Status[key].blood > 0:
+                ArmyB_Status[key].attack()
+            else:
+                ArmyB_Status[key].dead(ArmyB_Status[key])
 
+        #-----------------------
+'''
+
+def checkGameOver():
+    global Awin, Bwin, tie
+    print ('rate')
+    print (Awin)
+    print (Bwin)
+    print (tie)
+    Arest = 0
+    Brest = 0
+    for key in ArmyA_Status:
+        if ArmyA_Status[key].blood > 0:
+            Arest += 1
+    for key in ArmyB_Status:
+        if ArmyB_Status[key].blood > 0:
+            Brest += 1
+    if Arest == 0 and Brest == 0:
+        tie = tie + 1
+        return 'tie'
+    elif Arest == 0 and Brest > 0:
+        Bwin = Bwin + 1
+        return 'Bwin'
+    elif Arest > 0 and Brest == 0:
+        Awin = Awin + 1
+        return 'Awin'
+    else: 
+        return None
 
 def BlockFlush():
-    for key in Army_Status:
-        if Army_Status[key].blood > 0:
-            drawBlock( Army_Status[key].coord, Army_Status[key].color )
+    for key in ArmyA_Status: 
+        if ArmyA_Status[key].blood > 0:
+            drawBlock( ArmyA_Status[key].coord, ArmyA_Status[key].color )
+    for key in ArmyB_Status: 
+        if ArmyB_Status[key].blood > 0:
+            drawBlock( ArmyB_Status[key].coord, ArmyB_Status[key].color )
     return
 
 def checkForKeyPress():
@@ -77,17 +123,13 @@ def drawGrid():
         pygame.draw.line( DISPLAYSURF, DARKGRAY, (2,y), (WINDOWWIDTH,y))
 
 def drawPressMsg():
-    pressKeySurf = BASICFONT.render('Press Esc to exit War Game.', True, DARKGRAY)
+    global Awin, Bwin, tie
+    pressKeySurf = BASICFONT.render('Awin:'+str(Awin)+' Bwin:'+str(Bwin)+\
+                                    ' tie:'+str(tie), True, DARKGRAY)
     pressKeyRect = pressKeySurf.get_rect()
     pressKeyRect.topleft = (WINDOWWIDTH - 202, WINDOWHEIGHT - 30)
     DISPLAYSURF.blit( pressKeySurf, pressKeyRect )
 
-def drawPressKeyMsg():
-
-    pressKeySurf = BASICFONT.render('Press a key to play.', True, DARKGRAY)
-    pressKeyRect = pressKeySurf.get_rect()
-    pressKeyRect.topleft = (WINDOWWIDTH - 202, WINDOWHEIGHT - 30)
-    DISPLAYSURF.blit(pressKeySurf, pressKeyRect)
 
 def terminate():
     pygame.quit()
