@@ -1,11 +1,11 @@
-
 from SOLDIER import *
+from hero import *
 Awin = 0
 Bwin = 0
 tie = 0
 def main():
     global FPSCLOCK, DISPLAYSURF, BASICFONT
-    global ArmyA_Status, ArmyB_Status
+    global ArmyA_Status, ArmyB_Status, Hero_Status
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
@@ -16,29 +16,35 @@ def main():
         runGame()
 
 
-
 def initWarGame():
+    global Hero_Status
     DISPLAYSURF.fill(BGCOLOR)
     drawGrid()
     drawPressMsg()
+    Hero_Status['Knight'] = HERO('Knight', Army_A_Color)
     for i in range(Army_A_Num):
         ArmyA_Status['A'+ str(i)] = SOLDIER('A'+str(i), Army_A_Color)
     for i in range(Army_B_Num):
-        ArmyB_Status['B'+ str(i)] = SOLDIER('B'+str(i), Army_B_Color)
+        ArmyB_Status['B'+ str(i)] = SOLDIER('B'+str(i), Army_B_Color) 
+    #t = controlHERO('Knight')
+    #t.start()
 
 def runGame():
+    global Hero_Status
     while True:
         DISPLAYSURF.fill(BGCOLOR)
         checkForKeyPress()
         drawGrid()
         drawPressMsg()
-        print("start")
-        
+        #print("start")
+
         for i in range(Army_A_Num):
-            if ArmyB_Status['B'+ str(i)].blood > 0:
-                ArmyB_Status['B'+ str(i)].attack()
             if ArmyA_Status['A'+ str(i)].blood > 0:
                 ArmyA_Status['A'+ str(i)].attack()
+        for i in range(Army_B_Num):
+            if ArmyB_Status['B'+ str(i)].blood > 0:
+                ArmyB_Status['B'+ str(i)].attack()
+        Hero_Status['Knight'].getPlayerMovement()
 
         BlockFlush()
         pygame.display.update()
@@ -50,7 +56,7 @@ def runGame():
         #----Strategy-----------
         for key in ArmyA_Status:
             if ArmyA_Status[key].blood > 0:
-                Enemy = ArmyA_Status[key].searchEnemy(3) 
+                Enemy = ArmyA_Status[key].searchEnemy(3)
                 if Enemy is None:
                     ArmyA_Status[key].moveCasually()
                 else:
@@ -68,10 +74,10 @@ def runGame():
 
 def checkGameOver():
     global Awin, Bwin, tie
-    print ('rate')
-    print (Awin)
-    print (Bwin)
-    print (tie)
+    #print ('rate')
+    #print (Awin)
+    #print (Bwin)
+    #print (tie)
     Arest = 0
     Brest = 0
     for key in ArmyA_Status:
@@ -89,16 +95,20 @@ def checkGameOver():
     elif Arest > 0 and Brest == 0:
         Awin = Awin + 1
         return 'Awin'
-    else: 
+    else:
         return None
 
 def BlockFlush():
-    for key in ArmyA_Status: 
+    for key in ArmyA_Status:
         if ArmyA_Status[key].blood > 0:
             drawBlock( ArmyA_Status[key].coord, ArmyA_Status[key].color )
-    for key in ArmyB_Status: 
+    for key in ArmyB_Status:
         if ArmyB_Status[key].blood > 0:
             drawBlock( ArmyB_Status[key].coord, ArmyB_Status[key].color )
+    if Hero_Status['Knight'].blood > 0:
+            drawDoubleColorBlock(Hero_Status['Knight'].coord,\
+                                    Hero_Status['Knight'].color,\
+                                    WHITE)
     return
 
 def checkForKeyPress():
@@ -115,6 +125,16 @@ def drawBlock(coord,color):
     y = coord['y'] * CELLSIZE
     BlockRect = pygame.Rect( x, y, CELLSIZE, CELLSIZE )
     pygame.draw.rect( DISPLAYSURF, color, BlockRect )
+
+def drawDoubleColorBlock(coord,FOREcolor, BGcolor=WHITE):
+    x = coord['x'] * CELLSIZE
+    y = coord['y'] * CELLSIZE
+    BGBlockRect = pygame.Rect(x , y, CELLSIZE, CELLSIZE)
+    delta = CELLSIZE / 4
+    FOREBlockRect = pygame.Rect(x+delta, y+delta, CELLSIZE/2 , CELLSIZE/2)
+    pygame.draw.rect( DISPLAYSURF, BGcolor, BGBlockRect)
+    pygame.draw.rect( DISPLAYSURF, FOREcolor, FOREBlockRect)
+
 
 def drawGrid():
     for x in range( 2, WINDOWWIDTH, CELLSIZE ):
@@ -137,17 +157,3 @@ def terminate():
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-

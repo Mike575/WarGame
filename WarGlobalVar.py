@@ -12,14 +12,21 @@ DARKGRAY = ( 40, 40, 40 )
 DARKGREEN = ( 0, 155, 0 )
 BGCOLOR = BLACK
 #----------------------
+
+RIGHT = "RIGHT"
+LEFT = "LEFT"
+UP = "UP"
+DOWN = "DOWN"
+
 #------GAME CONSTANT--------
-FPS = 5
+FPS = 3
 ArmyA_Status = {}
 ArmyB_Status = {}
+Hero_Status = {}
 Army_A_Num = 10
-Army_B_Num = 10
+Army_B_Num = 20
 Army_A_Color = RED
-Army_B_Color = GREEN 
+Army_B_Color = GREEN
 #-----Window setting--------
 WINDOWWIDTH = 640
 WINDOWHEIGHT = 480
@@ -29,4 +36,3 @@ assert WINDOWHEIGHT % CELLSIZE == 0, "Window height must be a multiple of cell s
 CELLWIDTH = int(WINDOWWIDTH / CELLSIZE)
 CELLHEIGHT = int(WINDOWHEIGHT / CELLSIZE)
 #---------------------------
-
